@@ -10,9 +10,18 @@ phutil_register_library_map(array(
   '__library_version__' => 2,
   'class' =>
   array(
-    'BasicException' => 'common/BasicException.php',
-    'DatabaseException' => 'common/database/DatabaseException.php',
-    'DatabaseExceptionTestCase' => 'common/database/__tests__/DatabaseExceptionTestCase.php',
+    'BasicException' => 'common/exceptions/BasicException.php',
+    'BasicModel' => 'common/BasicModel.php',
+    'CommonExceptionsTestCase' => 'common/exceptions/__tests__/CommonExceptionsTestCase.php',
+    'Language' => 'common/Language.php',
+    'LanguageException' => 'common/exceptions/LanguageException.php',
+    'SecurityLevel' => 'common/SecurityLevel.php',
+    'SecurityLevelException' => 'common/exceptions/SecurityLevelException.php',
+    'Wiki' => 'wiki/Wiki.php',
+    'WikiException' => 'wiki/WikiException.php',
+    'WikiExceptionTestCase' => 'wiki/__tests__/WikiExceptionTestCase.php',
+    'WikiModel' => 'wiki/WikiModel.php',
+    'WikiParameterException' => 'wiki/WikiParameterException.php',
   ),
   'function' =>
   array(
@@ -20,7 +29,12 @@ phutil_register_library_map(array(
   'xmap' =>
   array(
     'BasicException' => 'Exception',
-    'DatabaseException' => 'BasicException',
-    'DatabaseExceptionTestCase' => 'ArcanistPhutilTestCase',
+    'CommonExceptionsTestCase' => 'ArcanistPhutilTestCase',
+    'LanguageException' => 'BasicException',
+    'SecurityLevelException' => 'BasicException',
+    'WikiException' => 'Exception',
+    'WikiExceptionTestCase' => 'ArcanistPhutilTestCase',
+    'WikiModel' => 'BasicModel',
+    'WikiParameterException' => 'WikiException',
   ),
 ));

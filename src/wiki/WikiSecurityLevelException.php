@@ -1,6 +1,6 @@
 <?php
 
-final class SecurityLevelException extends BasicException {
+final class WikiSecurityLevelException extends BasicException {
     /**
      * @return string
      */

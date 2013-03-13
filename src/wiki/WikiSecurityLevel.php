@@ -1,6 +1,6 @@
 <?php
 
-final class SecurityLevel {
+final class WikiSecurityLevel {
     const PUBLIC_ACCESS = 1;
     const PROTECTED_ACCESS = 2;
     const PRIVATE_ACCESS = 3;
@@ -16,12 +16,12 @@ final class SecurityLevel {
      * @return bool
      */
     public static function exists($security_level) {
-        return in_array($security_level, '1', '2', '3', true);
+        return in_array($security_level, array('1', '2', '3'), true);
     }
 
     /**
      * @param string $security_level
-     * @return bool
+     * @return int|null
      */
     public static function interpret($security_level) {
         switch ($security_level) {
@@ -35,7 +35,8 @@ final class SecurityLevel {
                 return self::PRIVATE_ACCESS;
 
             default:
-                return null;
+                throw new WikiSecurityLevelException(
+                    "Unrecognized wiki security level");
         }
     }
 }

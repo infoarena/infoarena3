@@ -15,12 +15,12 @@ final class Language {
      * @return bool
      */
     public static function exists($language) {
-        return in_array($language, '1', '2');
+        return in_array($language, array('1', '2'), true);
     }
 
     /**
      * @param string $language
-     * @return bool
+     * @return int
      */
     public static function interpret($language) {
         switch ($language) {
@@ -31,7 +31,7 @@ final class Language {
                 return self::ENGLISH;
 
             default:
-                return null;
+                throw new LanguageException("Unrecognized Language");
         }
     }
 }

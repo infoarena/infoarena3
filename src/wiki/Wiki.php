@@ -26,24 +26,18 @@ final class Wiki {
         $this->name = (string)$dictionary['name'];
         $this->text = (string)$dictionary['text'];
         $this->language = Language::interpret($dictionary['language']);
-        if ($this->language === null) {
-            throw new LanguageException("Unknown language in Wiki Object");
-        }
         $this->description = (string)$dictionary['description'];
-        $this->timestamp = $dictionary['timestamp'];
-        $this->creationTimestamp  = (string)$dictionary['creation_timestamp'];
+        $this->timestamp = strtotime($dictionary['timestamp']);
+        $this->creationTimestamp  =
+            strtotime($dictionary['creation_timestamp']);
         if ($this->timestamp === false || $this->creationTimestamp === false) {
             throw new WikiParameterException(
                 "Wiki timestamp unrecocgnized");
+        }
         $this->owner = (int)$dictionary['owner'];
         $this->editor = (int)$dictionary['editor'];
-        $this->security = SecurityLevel::interpret($dictionary['security']);
-        if ($this->security === null) {
-            throw new SecurityLevelException(
-                    "Security should be only public, protected or private in ".
-                    "Wiki Object");
-        }
-       }
+        $this->security =
+            WikiSecurityLevel::interpret($dictionary['security']);
     }
 
     /**
@@ -156,10 +150,19 @@ final class Wiki {
     }
 
     /**
-     * @param string $Name
+     * @param string $name
      * @return bool
      */
     public static function isName($name) {
+        if (!is_string($name)) {
+            throw new WikiParameterException(
+                'Wiki::isName expects `name` to be a string');
+        }
+
+        if (strlen($name) < 1 || strlen($name) > 64) {
+            return false;
+        }
+
         return preg_match('/^[a-z0-9][a-z0-9_\-\.]*$/i', $name) > 0;
     }
 }

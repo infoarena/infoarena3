@@ -13,6 +13,9 @@ phutil_register_library_map(array(
     'BasicException' => 'common/exceptions/BasicException.php',
     'BasicModel' => 'common/BasicModel.php',
     'CommonExceptionsTestCase' => 'common/exceptions/__tests__/CommonExceptionsTestCase.php',
+    'Configuration' => 'config/Configuration.php',
+    'ConfigurationException' => 'config/ConfigurationException.php',
+    'ConfigurationLoadingTestCase' => 'config/__tests__/ConfigurationLoadingTestCase.php',
     'Language' => 'common/Language.php',
     'LanguageException' => 'common/exceptions/LanguageException.php',
     'User' => 'user/User.php',
@@ -35,6 +38,8 @@ phutil_register_library_map(array(
   array(
     'BasicException' => 'Exception',
     'CommonExceptionsTestCase' => 'ArcanistPhutilTestCase',
+    'ConfigurationException' => 'BasicException',
+    'ConfigurationLoadingTestCase' => 'ArcanistPhutilTestCase',
     'LanguageException' => 'BasicException',
     'UserException' => 'BasicException',
     'UserParameterException' => 'UserException',

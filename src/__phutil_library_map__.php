@@ -19,6 +19,7 @@ phutil_register_library_map(array(
     'InfoarenaLintEngine' => 'lint/engine/InfoarenaLintEngine.php',
     'Language' => 'common/Language.php',
     'LanguageException' => 'common/exceptions/LanguageException.php',
+    'SpecializedLog' => 'log/SpecializedLog.php',
     'User' => 'user/User.php',
     'UserException' => 'user/UserException.php',
     'UserParameterException' => 'user/UserParameterException.php',

@@ -1,0 +1,8 @@
+{
+    "log.path" : "",
+    "log.format" : "[%D]\t%u\t%m - %p",
+
+    "debugging.mode" : false,
+    "debug.log.path" : "",
+    "debug.log.format" : "%m"
+}

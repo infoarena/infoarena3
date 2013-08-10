@@ -1,0 +1,8 @@
+RewriteEngine On
+
+php_value magic_quotes_gpc 0
+
+RewriteBase //ia3//
+
+RewriteRule ^(.*) index.php?_page=$1 [QSA]
+

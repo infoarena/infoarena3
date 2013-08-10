@@ -1,7 +1,7 @@
 {
   "project_id": "infoarena3",
   "conduit_uri": "https://hackers.infoarena.ro/",
-  "lint.engine": "PhutilLintEngine",
+  "lint.engine": "InfoarenaLintEngine",
   "unit.engine": "PhutilUnitTestEngine",
   "load": [
     "src"

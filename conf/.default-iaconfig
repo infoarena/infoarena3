@@ -1,6 +1,7 @@
 {
+    "timezone" : "Europe/London",
     "log.path" : "",
-    "log.format" : "[%D]\t%u\t%m - %p",
+    "log.format" : "%i:[%D]\t%u\t%m - %p",
 
     "debugging.mode" : false,
     "debug.log.path" : "",

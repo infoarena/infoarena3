@@ -1,3 +1,5 @@
 {
+    "timezone" : "Europe/Bucharest",
+
     "debugging.mode" : true
 }

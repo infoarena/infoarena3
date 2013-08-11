@@ -22,39 +22,99 @@ final class SpecializedLog {
      * @return this
      */
     public function __construct($path, $format, $keep_data = false) {
+        if (!is_string($path)) {
+            throw new SpecializedLogException(
+                "SpecializedLog expects `path` to be a string");
+        }
+
+        if (!is_string($format)) {
+            throw new SpecializedLogException(
+                "SpecializedLog expects `format` to be a string");
+        }
+
+        if (!is_bool($keep_data)) {
+            throw new SpecializedLogException(
+                "SpecializedLog expects `keep_data` to be a boolean");
+        }
+
         if (empty($path)) {
             $this->path = null;
         } else {
+            try {
+                Filesystem::assertIsFile($path);
+            } catch(Exception $e) {
+                throw new SpecializedLogException(
+                    "Log path is not an accesible file");
+            }
+
+            try {
+                Filesystem::assertWritable($path);
+            } catch(Exception $e) {
+                throw new SpecializedLogException(
+                    "Log file is not writable");
+            }
+
             $this->path = $path;
         }
 
         $this->format = $format;
         if ($keep_data) {
-            $data = '';
+            $this->data = '';
         } else {
-            $data = null;
+            $this->data = null;
         }
     }
 
     /**
      * Prints the data in the associative array
-     * Usally m stands for message and u for user
      *
-     * @param string $data
-     * @return void
+     * By defautl D is then date, p is the request URL and i the remote info,
+     * they are already set
+     *
+     * Optional elements are m which is for the message and u for the userid
+     *
+     * @param array $data
+     * @return this
      */
     public function printData($data) {
+        if (!is_array($data)) {
+            throw new SpecializedLogException(
+                "SpecializedLog::printData expects `data` to be an array");
+        }
+
         $log = id(new PhutilDeferredLog($this->path, $this->format))
-            ->setFailQuietly(true)
+            ->setFailQuietly(false)
             ->setData(array(
                 'D' => date('r'),
-                'p' => $_REQUEST['_page']))
+                'p' => idx($_REQUEST, '_path'),
+                'i' => InfoarenaEnvironment::getRemoteIPInfo()))
             ->setData($data);
         $log->write();
 
         if ($this->data !== null) {
             $this->data .= idx($data, 'm', ''). "\n";
         }
+
+        return $this;
+    }
+
+    /**
+     * Prints this message to the specified log
+     *
+     * More user friendly
+     *
+     * @param string
+     * @return this
+     */
+    public function printMessage($message) {
+        if (!is_string($message)) {
+            throw new SpecializedLogException(
+                "SpecializedLog::printMessage expects `message` to be a string"
+            );
+        }
+
+        return $this->printData(array(
+            'm' => $message));
     }
 
     /**

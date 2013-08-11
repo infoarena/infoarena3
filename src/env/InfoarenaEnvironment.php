@@ -18,7 +18,7 @@ final class InfoarenaEnvironment {
      * @return void
      */
     public static function start() {
-        self::setRoot(realpath(dirname(dirname(__FILE__))));
+        self::setRoot(realpath(dirname(dirname(dirname(__FILE__)))));
 
         static $registered_shutdown;
         if (!$registered_shutdown) { // this way we can call this function
@@ -32,12 +32,16 @@ final class InfoarenaEnvironment {
 
         // now we have acces to the power of libphutil
         self::loadConfig();
+        self::setTimezone();
 
         self::initLog();
 
         if (self::getEnvConfig('debugging.mode')) {
             self::initDebugLog();
         }
+
+        self::getLog()->printData(array(
+            'm' => 'Request started'));
     }
 
     /**
@@ -126,6 +130,15 @@ final class InfoarenaEnvironment {
         return self::$root;
     }
 
+    /**
+     * Returns the current remote ip information
+     * TODO: make it smarter
+     *
+     * @return string
+     */
+    public static function getRemoteIpInfo() {
+        return idx($_SERVER, 'REMOTE_ADDR', '');
+    }
 
     /**
      * Sets the root folder of the project
@@ -207,7 +220,16 @@ final class InfoarenaEnvironment {
     }
 
     /**
-     * Initializes the specialized log (not acces, nor error)
+     * Sets the current timezone based on the configuration
+     *
+     * @return void
+     */
+    private static function setTimezone() {
+        date_default_timezone_set(self::getEnvConfig("timezone"));
+    }
+
+    /**
+     * Initializes the specialized log (not access, nor error)
      *
      * @return void
      */
@@ -217,8 +239,15 @@ final class InfoarenaEnvironment {
             self::getEnvConfig("log.format"));
     }
 
+    /**
+     * Initializes the debug log
+     *
+     * You should print to this log for debugging
+     *
+     * @return void
+     */
     private static function initDebugLog() {
-        self::$log = new SpecializedLog(
+        self::$debugLog = new SpecializedLog(
             self::getEnvConfig("debug.log.path"),
             self::getEnvConfig("debug.log.format"),
             $keep_data = true);

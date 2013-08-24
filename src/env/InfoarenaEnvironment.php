@@ -12,6 +12,7 @@ final class InfoarenaEnvironment {
     private static $root;
     private static $log;
     private static $debugLog;
+    private static $request;
 
     /**
      * Method to be called to prepare everything
@@ -42,6 +43,8 @@ final class InfoarenaEnvironment {
 
         self::getLog()->printData(array(
             'm' => 'Request started'));
+
+        self::buildRequest();
     }
 
     /**
@@ -138,6 +141,15 @@ final class InfoarenaEnvironment {
      */
     public static function getRemoteIpInfo() {
         return idx($_SERVER, 'REMOTE_ADDR', '');
+    }
+
+    /**
+     * Returns the current request object
+     *
+     * @return Request
+     */
+    public static function getRequest() {
+        return self::$request;
     }
 
     /**
@@ -251,5 +263,29 @@ final class InfoarenaEnvironment {
             self::getEnvConfig("debug.log.path"),
             self::getEnvConfig("debug.log.format"),
             $keep_data = true);
+    }
+
+    /**
+     * Build the request with the $_GET, $_POST data
+     */
+    private static function buildRequest() {
+        self::$request = new Request(
+            idx($_SERVER, 'SERVER_NAME', 'localhost'),
+            idx($_GET, '_path', '/'));
+
+        if (empty($_SERVER['HTTPS'])) {
+            self::$request->setProtocol('HTTP');
+        } else if (!strcasecmp($_SERVER['HTTPS'], 'off')) {
+            self::$request->setProtocol('HTTP');
+        } else {
+            self::$request->setProtocol('HTTPS');
+        }
+
+        self::$request->setData($_POST);
+        self::$request->setMethod(idx($_SERVER, 'REQUEST_METHOD', 'GET'));
+
+        $arguments = $_GET;
+        unset($arguments['_path']);
+        self::$request->setArguments($arguments);
     }
 }

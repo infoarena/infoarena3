@@ -10,6 +10,7 @@ final class SpecializedLog {
     private $path;
     private $format;
     private $data;
+    private $commonData;
 
     /**
      * Constructs a log that outputs at $path using the format $format
@@ -63,6 +64,19 @@ final class SpecializedLog {
         } else {
             $this->data = null;
         }
+
+        $this->commonData = array();
+    }
+
+    /**
+     * Set this as extra common data for logging
+     *
+     * @param array $extra_data
+     * @return this
+     */
+    public function setCommonData(array $extra_data) {
+        $this->commonData = $extra_data;
+        return $this;
     }
 
     /**
@@ -88,6 +102,7 @@ final class SpecializedLog {
                 'D' => date('r'),
                 'p' => idx($_REQUEST, '_path'),
                 'i' => InfoarenaEnvironment::getRemoteIPInfo()))
+            ->setData($this->commonData)
             ->setData($data);
         $log->write();
 

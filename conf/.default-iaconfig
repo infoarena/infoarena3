@@ -5,5 +5,17 @@
 
     "debugging.mode" : false,
     "debug.log.path" : "",
-    "debug.log.format" : "%m"
+    "debug.log.format" : "%m",
+
+    "script.log.path" : "",
+    "script.log.format": "[%D]\t%n\t%m",
+    "mysql.host" : "",
+    "mysql.port" : 3306,
+    "mysql.user" : "",
+    "mysql.pass" : "",
+    "mysql.database" : "",
+    "mysql.retries" : 3,
+
+    "cookie.prefix" : "ia_",
+    "db.prefix" : "ia_"
 }

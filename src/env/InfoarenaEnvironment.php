@@ -12,7 +12,10 @@ final class InfoarenaEnvironment {
     private static $root;
     private static $log;
     private static $debugLog;
+    private static $scriptLog;
     private static $request;
+    private static $databaseConnection;
+    private static $session;
 
     /**
      * Method to be called to prepare everything
@@ -45,8 +48,55 @@ final class InfoarenaEnvironment {
             'm' => 'Request started'));
 
         self::buildRequest();
+
+        // this is a lazy database, it will only connect if needed
+        self::buildDatabaseConnection();
+
+        self::buildSession();
     }
 
+    /**
+     * Same as start but loads everything for scripts
+     *
+     * @return void
+     */
+    public static function startForScripts() {
+        self::setRoot(realpath(dirname(dirname(dirname(__FILE__)))));
+
+        static $registered_shutdown;
+        if (!$registered_shutdown) {
+            register_shutdown_function(array(__CLASS__, 'stopForScripts'));
+            $registered_shutdown = true;
+        }
+
+        self::setupPHP();
+        self::loadLibraries();
+
+        self::loadConfig();
+        self::setTimezone();
+
+        if (self::getEnvConfig('debugging.mode')) {
+            self::initDebugLog();
+        }
+
+        self::buildDatabaseConnection();
+        AphrontWriteGuard::allowDangerousUnguardedWrites($allow = true);
+    }
+
+    /**
+     * Prepare for a specific script
+     *
+     * For the moment only prints to the log
+     *
+     * @param string $name
+     * @return void
+     */
+    public static function prepareForScript($name) {
+        self::initScriptLog($name);
+
+        self::getScriptLog()->printData(array(
+            'm' => 'Script started'));
+    }
     /**
      * Will be called at the end of execution
      * Should fancy display errors
@@ -74,6 +124,35 @@ final class InfoarenaEnvironment {
         $user_message = "Fatal Error";
 
         self::crash($message, $user_message);
+    }
+
+    /**
+     * Same as stop but for scripts
+     *
+     * This doesn't hide the information but displays it all
+     */
+    public static function stopForScripts() {
+        $event = error_get_last();
+        if (!$event) {
+            return;
+        }
+
+        switch ($event['type']) {
+            case E_ERROR:
+            case E_PARSE:
+            case E_COMPILE_ERROR:
+                break;
+            default:
+                return;
+        }
+
+        $message = $event['message'].' at line '.$event['line'].' in file '.
+            $event['file'] . ". Fix IT!";
+
+        error_log($message);
+        echo $message . "\n";
+
+        exit(1);
     }
 
     /**
@@ -125,6 +204,15 @@ final class InfoarenaEnvironment {
     }
 
     /**
+     * Gets the script log
+     *
+     * @return SpecializedLog
+     */
+    public static function getScriptLog() {
+        return self::$scriptLog;
+    }
+
+    /**
      * Gets the root folder of the project
      *
      * @return string
@@ -150,6 +238,24 @@ final class InfoarenaEnvironment {
      */
     public static function getRequest() {
         return self::$request;
+    }
+
+    /**
+     * Returns the current database connection
+     *
+     * @return AphrontDatabaseConnection
+     */
+    public static function getDatabaseConnection() {
+        return self::$databaseConnection;
+    }
+
+    /**
+     * Returns the current session information
+     *
+     * @return Session
+     */
+    public static function getSession() {
+        return self::$session;
     }
 
     /**
@@ -266,6 +372,23 @@ final class InfoarenaEnvironment {
     }
 
     /**
+     * Initializes the script log
+     *
+     * This is where scripts should write information
+     *
+     * @string name
+     * @return void
+     */
+    private static function initScriptLog($name) {
+        self::$scriptLog = id(new SpecializedLog(
+            self::getEnvConfig("script.log.path"),
+            self::getEnvConfig("script.log.format"),
+            $keep_data = true))
+            ->setCommonData(array(
+                'n' => $name));
+    }
+
+    /**
      * Build the request with the $_GET, $_POST data
      */
     private static function buildRequest() {
@@ -287,5 +410,33 @@ final class InfoarenaEnvironment {
         $arguments = $_GET;
         unset($arguments['_path']);
         self::$request->setArguments($arguments);
+    }
+
+    private static function buildDatabaseConnection() {
+        $implementation = (extension_loaded('mysqli')
+            ? 'AphrontMySQLiDatabaseConnection'
+            : 'AphrontMySQLDatabaseConnection');
+        self::$databaseConnection = newv(
+            $implementation,
+            array(
+                array(
+                    'host' => self::getEnvConfig('mysql.host'),
+                    'port' => self::getEnvConfig('mysql.port'),
+                    'user' => self::getEnvConfig('mysql.user'),
+                    'pass' => self::getEnvConfig('mysql.pass'),
+                    'database' => self::getEnvConfig('mysql.database'),
+                    'retries' => self::getEnvConfig('mysql.retries'))));
+    }
+
+    private static function buildSession() {
+        self::$session =
+            new Session(
+                self::$databaseConnection,
+                $_COOKIE,
+                self::getEnvConfig('cookie.prefix'));
+
+        if (self::$request->argument("_skey")) {
+            self::$session->setKey(self::$request->argument("_skey"));
+        }
     }
 }

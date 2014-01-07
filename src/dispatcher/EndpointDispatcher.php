@@ -18,7 +18,7 @@ final class EndpointDispatcher {
      */
     public function __construct() {
         $this->map = array(
-            '/' => 'DefaultController',
+            '/' => 'HomeController',
             "(w|wiki)/" => 'WikiDefaultController');
     }
 

@@ -24,7 +24,7 @@ final class EndpointDispatcherTestCase extends ArcanistPhutilTestCase {
         list($controller, $new_request) = $dispatcher->getController($request);
 
         $this->assertEqual(
-            'DefaultController',
+            'HomeController',
             $controller,
             'Controller not set correctly');
         $this->assertEqual(

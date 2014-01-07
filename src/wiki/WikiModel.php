@@ -65,7 +65,8 @@ final class WikiModel extends BasicModel {
                 "be numeric");
         }
 
-        $result = $this->connection->query_one(
+        $result = queryfx_one(
+            $this->connection,
             "%Q %Q",
             $this->buildSelectIdClause(),
             $this->buildWhereByNameAndParentClause($name, $parent_id));
@@ -90,7 +91,8 @@ final class WikiModel extends BasicModel {
                 "WikiModel::getWikiById expects a language that exists");
         }
 
-        $result = $this->connection->query_one(
+        $result = queryfx_one(
+            $this->connection,
             "%Q %Q %Q",
             $this->buildSelectClause(),
             $this->buildJoinClause(),
@@ -114,7 +116,8 @@ final class WikiModel extends BasicModel {
                 "numeric");
         }
 
-        $result = $this->connection->query_one(
+        $result = queryfx_one(
+            $this->connection,
             "%Q %Q",
             $this->buildSelectClause(),
             $this->buildJoinByRevisionIdClause());
@@ -130,20 +133,22 @@ final class WikiModel extends BasicModel {
      * @return string
      */
     private function buildSelectClause() {
+        $wiki_table_name = $this->getTableName('wiki');
+        $wiki_revision_table_name = $this->getTableName('wiki_revision');
         return <<<SQL
-            SELECT
-                `ia_wiki`.`id` as `id`,
-                `ia_wiki`.`name` as `name`,
-                `ia_wiki`.`language` as `language`,
-                `ia_wiki`.`creation_timestamp` as `creation_timestamp`,
-                `ia_wiki`.`owner` as `owner`,
-                `ia_wiki`.`security` as `security`,
-                `ia_wiki_revision`.`id` as `revision_id`,
-                `ia_wiki_revision`.`text` as `text`,
-                `ia_wiki_revision`.`description` as `description`,
-                `ia_wiki_revision`.`timestamp` as `timestamp`,
-                `ia_wiki_revision`.`editor` as `editor`,
-            FROM `ia_wiki`
+SELECT
+    {$wiki_table_name}.`id` as `id`,
+    {$wiki_table_name}.`name` as `name`,
+    {$wiki_table_name}.`language` as `language`,
+    {$wiki_table_name}.`creation_timestamp` as `creation_timestamp`,
+    {$wiki_table_name}.`owner` as `owner`,
+    {$wiki_table_name}.`security` as `security`,
+    {$wiki_revision_table_name}.`id` as `revision_id`,
+    {$wiki_revision_table_name}.`text` as `text`,
+    {$wiki_revision_table_name}.`description` as `description`,
+    {$wiki_revision_table_name}.`timestamp` as `timestamp`,
+    {$wiki_revision_table_name}.`editor` as `editor`,
+FROM {$wiki_table_name}
 SQL;
     }
 
@@ -151,10 +156,11 @@ SQL;
      * @return string
      */
     private function buildSelectIdClause() {
+        $wiki_table_name = $this->getTableName('wiki');
         return <<<SQL
-            SELECT
-                `ia_wiki`.`id` as `id`
-            FROM `ia_wiki`
+SELECT
+    {$wiki_table_name}.`id` as `id`
+FROM {$wiki_table_name}
 SQL;
     }
 
@@ -162,9 +168,11 @@ SQL;
      * @return string
      */
     private function buildJoinClause() {
+        $wiki_table_name = $this->getTableName('wiki');
+        $wiki_revision_table_name = $this->getTableName('wiki_revision');
         return <<<SQL
-             INNER JOIN `ia_wiki_revision` ON
-                `ia_wiki`.`revision_id`  = `ia_wiki_revision`.`id`
+INNER JOIN {$wiki_revision_table_name} ON
+    {$wiki_table_name}.`revision_id`  = {$wiki_revision_table_name}.`id`
 SQL;
     }
 
@@ -174,10 +182,12 @@ SQL;
      * @return string
      */
     private function buildWhereByIdClause($id, $language) {
+        $wiki_table_name = $this->getTableName('wiki', $raw = true);
         return qsprintf(
             $this->connection,
-            'WHERE `ia_wiki`.`id` = %d and `ia_wiki`.`language` = %d',
-            $id, $language);
+            'WHERE %T.`id` = %d and %T.`language` = %d',
+            $wiki_table_name, $id,
+            $wiki_table_name, $language);
     }
 
     /**
@@ -186,10 +196,12 @@ SQL;
      * @return string
      */
     private function buildWhereByNameAndParentClause($name, $parent_id) {
+        $wiki_table_name = $this->getTableName('wiki', $raw = true);
         return qsprintf(
             $this->connection,
-            'WHERE `ia_wiki`.`name` = %s and `ia_wiki`.`parent_id` = %d',
-            $name, $parent_id);
+            'WHERE %T.`name` = %s and %T.`parent_id` = %d',
+            $wiki_table_name, $name,
+            $wiki_table_name, $parent_id);
     }
 
     /**
@@ -197,11 +209,16 @@ SQL;
      * @return string
      */
     private function buildJoinByRevisionIdClause($revision_id) {
+        $wiki_table_name = $this->getTableName('wiki', $raw = true);
+        $wiki_revision_table_name =
+            $this->getTableName('wiki_revision', $raw = true);
         return qsprintf(
             $this->connection,
-            'INNER JOIN `ia_wiki_revision` ON
-                `ia_wiki`.`id` = `ia_wiki_revision`.`wiki_id` and
-                `ia_wiki_revision`.`id` = %d',
-            $revision_id);
+            'INNER JOIN %T ON
+                %T.`id` = %T.`wiki_id` and
+                %T.`id` = %d',
+            $wiki_revision_table_name,
+            $wiki_table_name, $wiki_revision_table_name,
+            $wiki_revision_table_name, $revision_id);
     }
 }

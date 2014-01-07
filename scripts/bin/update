@@ -1,0 +1,9 @@
+#!/usr/bin/python2
+#You can do sym links to this file, it should work
+
+import os.path
+from subprocess import call
+file_path = os.path.realpath(__file__)
+folder_path, _ = os.path.split(file_path)
+
+call(folder_path + "/../migrations/update.sql.php")

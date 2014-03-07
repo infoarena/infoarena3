@@ -6,5 +6,7 @@
 final class HomeController extends BasicController {
     public function execute() {
         $session_info = $this->session->getInfo();
+
+        return new HomeView();
     }
 }

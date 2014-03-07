@@ -26,7 +26,7 @@ final class EndpointDispatcher {
      * Given the request maps its path to a controller
      *
      * Also returns a condensed request, which retains only a smaller part of
-     * the request, the part that wasnt matched
+     * the request, the part that wasn't matched
      *
      * @param Request $request
      * @return array(string, Request)

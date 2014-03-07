@@ -2,3 +2,5 @@ arc
 arcanist
 libphutil
 .phutil_module_cache
+web/assets/result
+.sass-cache/

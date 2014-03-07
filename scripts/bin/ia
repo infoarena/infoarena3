@@ -1,0 +1,30 @@
+#!/usr/bin/python2
+#You can do sym links to this file, it should work
+from __future__ import print_function
+import os.path
+
+from subprocess import call
+file_path = os.path.realpath(__file__)
+folder_path, _ = os.path.split(file_path)
+
+Commands = {
+    "update" :
+        ("install sql patches", "migrations/update.sql.php"),
+    "rebuild" :
+        ("rebuild js and css from coffeescript and sass",
+         "refresh/build.static.files.php"),
+    "help" :
+        ("Help with commands", None)
+}
+
+from sys import argv
+if len(argv) != 2 or argv[1] == 'help' or argv[1] not in Commands:
+    print("Usage: ia [COMMAND]")
+    print("Runs the specified command");
+    print()
+
+    print("Commands: ")
+    for command, action in Commands.iteritems():
+        print("  %-*s\t%s" % (10, command, action[0]))
+else:
+    call(folder_path + "/../" + Commands[argv[1]][1])

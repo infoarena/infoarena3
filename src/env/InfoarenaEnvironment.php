@@ -16,6 +16,7 @@ final class InfoarenaEnvironment {
     private static $request;
     private static $databaseConnection;
     private static $session;
+    private static $staticFiles;
 
     /**
      * Method to be called to prepare everything
@@ -36,6 +37,9 @@ final class InfoarenaEnvironment {
 
         // now we have acces to the power of libphutil
         self::loadConfig();
+
+        self::loadStaticFilesConfig();
+
         self::setTimezone();
 
         self::initLog();
@@ -170,6 +174,10 @@ final class InfoarenaEnvironment {
 
         error_log($message);
         echo $user_message;
+        if (self::isDevelopmentModeOn()) {
+            echo "\n";
+            echo $message;
+        }
 
         exit(1);
     }
@@ -250,12 +258,20 @@ final class InfoarenaEnvironment {
     }
 
     /**
-     * Returns the current session information
+     * Returns the current session
      *
      * @return Session
      */
     public static function getSession() {
         return self::$session;
+    }
+
+    /**
+     * Returns the configuration containing the name of the js and css files
+     * @return Configuration
+     */
+    public static function getStaticFiles() {
+        return self::$staticFiles;
     }
 
     /**
@@ -267,6 +283,15 @@ final class InfoarenaEnvironment {
      */
     private static function setRoot($new_root) {
         self::$root = $new_root;
+    }
+
+    /**
+     * Returns whether we are in development mode or not
+     *
+     * @return bool
+     */
+    public static function isDevelopmentModeOn() {
+        return self::getEnvConfig('debugging.mode');
     }
 
     /**
@@ -334,6 +359,23 @@ final class InfoarenaEnvironment {
         } catch (Exception $e) {
             self::crash(
                 "[Configuration filesystem exception] ".$e->getMessage());
+        }
+    }
+
+    private static function loadStaticFilesConfig() {
+        try {
+            $default_config =
+                Filesystem::readFile(
+                    self::getRoot().'/conf/.static-files');
+            self::$staticFiles = new Configuration('{}', $default_config);
+        } catch (BasicException $e) {
+            self::crash(
+                "[Configuration exception for static files] ".$e->getMessage(),
+                $e->getUserMessage());
+        } catch (Exception $e) {
+            self::crash(
+                "[Configuration filesystem exception for static files] ".
+                $e->getMessage());
         }
     }
 

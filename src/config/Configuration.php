@@ -14,6 +14,9 @@ final class Configuration {
      * @return void
      */
    public function __construct($user_config, $default_config) {
+        $user_config = StringUtils::removeComments($user_config);
+        $default_config = StringUtils::removeComments($default_config);
+
         $user_config =
             json_decode($user_config);
 

@@ -59,6 +59,6 @@ final class InfoarenaLintEngine extends PhutilLintEngine {
     }
 
     private function isProjectFile($path) {
-        return preg_match("@\.(php|css|js)$@", $path);
+        return preg_match("@\.(php|coffee|sass)$@", $path);
     }
 }

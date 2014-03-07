@@ -15,4 +15,18 @@ final class StringUtils {
             $substring = '';
         return $substring;
     }
+
+    /**
+     * To remove comments like /* * / (space added to not break comment)
+     * or like this // comment
+     * Useful when parsing JSON
+     *
+     * @param string $string
+     * @return string
+     */
+    public static function removeComments($string) {
+        return preg_replace(
+            "#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|".
+            "([\s\t]//.*)|(^//.*)#", '', $string);
+    }
 }
